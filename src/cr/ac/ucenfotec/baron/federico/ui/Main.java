@@ -49,6 +49,7 @@ public class Main {
             out.println("4. Listar subastas");
             out.println("5. Crear una oferta");
             out.println("6. Listar ofertas");
+            out.println("7. Cancelar subastas");
             out.println("0. Salir");
             out.println("------------------------------------------");
             out.println("Digite una opción: ");
@@ -134,6 +135,20 @@ public class Main {
                 } else {
 
                     listarOfertas();
+                }
+
+                break;
+
+
+            case (7):
+
+                if (!service.haySubastas()) {
+
+                    out.println("No hay subastas registrados para crear una oferta");
+
+                } else {
+
+                    cancelarSubastas();
                 }
 
                 break;
@@ -343,6 +358,7 @@ public class Main {
         opcionCreador = Integer.parseInt(in.readLine());
         creador = service.listarUsuarios().get(opcionCreador - 1);
 
+        out.println("----- Colección Personal -----");
         if (creador.getTipo() == TipoUsuario.COLECCIONISTA) {
 
             for (int i = 0; i < creador.getListaObjetos().size(); i++) {
@@ -455,7 +471,6 @@ public class Main {
             service.subastaVencio(service.listarSubastas().get(i)); // llama al metodo que verifica si la subasta sigue activa
             out.println("Estado de la subasta: " + service.listarSubastas().get(i).getEstado());
             out.println("Tiempo restante de la subasta: " + service.listarSubastas().get(i).calcularTiempoRestante());
-
             out.println("-------------------");
 
         }
@@ -476,7 +491,7 @@ public class Main {
         Usuario usuario;
 
 
-        for (int i = 0; i < service.listarSubastas().size(); i++) { // recorre el array par mostrar las subastas
+        for (int i = 0; i < service.listarSubastas().size(); i++) { // recorre el array para mostrar las subastas
 
             out.println("----- Subastas publicadas -----");
             out.println("Subasta #" + (i + 1));
@@ -487,17 +502,115 @@ public class Main {
                 out.println("Objeto: " + service.listarSubastas().get(i).getListaObjetos().get(j).getNombreObjeto());
                 out.println("Descripción: " + service.listarSubastas().get(i).getListaObjetos().get(j).getDescripcion());
                 out.println("Antigüedad: " + service.listarSubastas().get(i).getListaObjetos().get(j).calcularAntiguedad());
+                out.println("Estado de la subasta: " + service.listarSubastas().get(i).getEstado());
+
             }
 
-            out.println("Precio minimo en dolares: (Sin guiones, ni puntos)" + service.listarSubastas().get(i).getPrecioMinimo());
+            out.println("Precio minimo en dolares: " + service.listarSubastas().get(i).getPrecioMinimo());
             out.println("-------------------");
         }
 
         out.println("Ingrese el numero de subasta a la que quiere ofertar ");
         seleccionoSubasta = Integer.parseInt(in.readLine());
+
         subasta = service.listarSubastas().get(seleccionoSubasta - 1);
 
-        out.println(" ");
+        if (!service.subastaActiva(subasta)) {
+            out.println("La subasta ya no está disponible");
+            return;
+
+        } else {
+            out.println(" ");
+            out.println("----- Usuarios ------");
+            for (int i = 0; i < service.listarUsuarios().size(); i++) { // recorre el array par mostrar los usuarios registrados
+
+                out.println("Usuario #" + (i + 1));
+                out.println("Nombre: " + service.listarUsuarios().get(i).getNombre());
+                out.println("ID: " + service.listarUsuarios().get(i).getId());
+                out.println("Correo Electronico: " + service.listarUsuarios().get(i).getCorreoElectronico());
+                out.println("Tipo: " + service.listarUsuarios().get(i).getTipo());
+                out.println("-------------------");
+
+            }
+
+            out.println("Ingrese el numero del usuario que va a ofertar: ");
+            seleccionOfertante = Integer.parseInt(in.readLine());
+            usuario = service.listarUsuarios().get(seleccionOfertante - 1);
+
+            if (service.puedeParcipar(subasta, usuario) == true) {
+
+                out.println("Este usuario no puede participar de la subasta");
+
+                return;
+            } else {
+
+                if (service.puedeOfertar(usuario) == true) {
+
+                    double precioOferta;
+
+                    out.println("Realice una oferta: ");
+                    precioOferta = Double.parseDouble(in.readLine());
+
+                    if (service.ofertaValida(precioOferta, subasta.getPrecioMinimo()) == true) {
+
+                        service.registrarOfertas(subasta, usuario, precioOferta);
+                        out.println("Su oferta fue procesada exitosamente: ");
+
+
+                    } else {
+
+                        out.println("Su oferta debe ser mayor al valor actual minimo");
+                        return;
+                    }
+
+                } else {
+
+                    out.println("------------------------------------");
+                    out.println("El usario no puede oferta en subastas");
+                    out.println("debe ser Coleccionista");
+                    out.println("------------------------------------");
+                }
+                return;
+            }
+        }
+    }
+
+    /**
+     * Listar las ofertas recibidas por los usuarios para las diferentes subastas
+     */
+    public static void listarOfertas() {
+
+        out.println("------- LISTA OFERTAS -------");
+
+        for (int u = 0; u < service.listarOfertas().size(); u++) {
+
+            for (int i = 0; i < service.listarSubastas().size(); i++) {
+
+                service.subastaVencio(service.listarSubastas().get(i));
+
+                for (int j = 0; j < service.listarSubastas().get(i).getListaOfertas().size(); j++) {
+
+                    out.println("Ofertante: " + service.listarSubastas().get(i).getListaOfertas().get(j).getColeccionista().getNombre());
+                    out.println("Objeto: " + service.listarSubastas().get(i).getListaObjetos().get(0).getNombreObjeto());
+                    out.println("Precio: " + service.listarSubastas().get(i).getListaOfertas().get(j).getprecioOferta());
+                }
+            }
+            out.println("Estado de la subasta: " + service.listarSubastas().get(u).getEstado());
+            out.println("Tiempo restante de la subasta: " + service.listarSubastas().get(u).calcularTiempoRestante());
+            out.println("-------------------");
+        }
+    }
+
+    /**
+     * Meotodo para que un moderador pueda cancelar alguna subasta
+     */
+
+    public static void cancelarSubastas() throws IOException {
+
+        int usuarioModerador;
+        int seleccionSubastaCancelar;
+
+
         out.println("----- Usuarios ------");
         for (int i = 0; i < service.listarUsuarios().size(); i++) { // recorre el array par mostrar los usuarios registrados
 
@@ -509,62 +622,43 @@ public class Main {
             out.println("-------------------");
 
         }
+        out.println("Seleccione el numero del usario que va a cancelar la subasta; ");
+        usuarioModerador = Integer.parseInt(in.readLine());
 
-        out.println("Ingrese el numero del usuario que va a ofertar: ");
-        seleccionOfertante = Integer.parseInt(in.readLine());
-        usuario = service.listarUsuarios().get(seleccionOfertante - 1);
+        Usuario moderador = service.listarUsuarios().get(usuarioModerador - 1);
 
-        if (service.puedeParcipar(subasta, usuario) == true) {
+        if (service.puedeCancelarSubasta(moderador) == true) {
 
-            out.println("Este usuario no puede participar de la subasta");
+            for (int i = 0; i < service.listarSubastas().size(); i++) { // recorre el array para mostrar las subastas
 
-            return;
-        } else {
+                out.println("----- Subastas publicadas -----");
+                out.println("Subasta #" + (i + 1));
+                out.println("Nombre del creador: " + service.listarSubastas().get(i).getCreador().getNombre());
 
-            if (service.puedeOfertar(usuario) == true) {
+                for (int j = 0; j < service.listarSubastas().get(i).getListaObjetos().size(); j++) { // ciclo for que recorre la lista de los objetos
 
-                double precioOferta;
+                    out.println("Objeto: " + service.listarSubastas().get(i).getListaObjetos().get(j).getNombreObjeto());
+                    out.println("Descripción: " + service.listarSubastas().get(i).getListaObjetos().get(j).getDescripcion());
+                    out.println("Antigüedad: " + service.listarSubastas().get(i).getListaObjetos().get(j).calcularAntiguedad());
+                    out.println("Precio minimo en dolares: " + service.listarSubastas().get(i).getPrecioMinimo());
+                    out.println("-------------------");
 
-                out.println("Realice una oferta: ");
-                precioOferta = Double.parseDouble(in.readLine());
-
-                if (service.ofertaValida(precioOferta, subasta.getPrecioMinimo()) == true) {
-
-                    service.registrarOfertas(subasta, usuario, precioOferta);
-                    out.println("Su oferta fue procesada exitosamente: ");
-
-
-                } else {
-
-                    out.println("Su oferta debe ser mayor al valor actual minimo");
-                    return;
                 }
 
-            } else {
+            }
 
-                out.println("------------------------------------");
-                out.println("El usario no puede oferta en subastas");
-                out.println("debe ser Coleccionista");
-                out.println("------------------------------------");
-            }    return;
+            out.println("Ingrese el numero de subasta que quiere cancelar: ");
+            seleccionSubastaCancelar = Integer.parseInt(in.readLine());
+            Subasta subasta = service.listarSubastas().get(seleccionSubastaCancelar - 1);
+
+            service.CancelarSubasta(subasta);
+            out.println("Subasta cancelada exitosamente");
+
+        } else {
+            out.println("El usuario tiene que ser tipo moderador para cancelar una subasta");
+
         }
     }
-
-    /**
-     * Listar las ofertas recibidas por los usuarios para las diferentes subastas
-     */
-    public static void listarOfertas() {
-
-        out.println("------- LISTA OFERTAS -------");
-        for (int i = 0; i < service.listarOfertas().size(); i++) {
-
-
-            out.println("Nombre del ofertante: " + service.listarOfertas().get(i).getColeccionista().getNombre());
-            out.println("Precio ofertado: " + service.listarOfertas().get(i).getprecioOferta());
-            out.println("-------------------");
-        }
-    }
-
     /**
      * The entry point of application.
      *
