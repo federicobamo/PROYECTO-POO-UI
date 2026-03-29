@@ -1,6 +1,10 @@
 package cr.ac.ucenfotec.baron.federico.ui;
 
 import cr.ac.ucenfotec.baron.federico.bl.entities.*;
+import cr.ac.ucenfotec.baron.federico.bl.entities.usuario.Coleccionista;
+import cr.ac.ucenfotec.baron.federico.bl.entities.usuario.Moderador;
+import cr.ac.ucenfotec.baron.federico.bl.entities.usuario.Usuario;
+import cr.ac.ucenfotec.baron.federico.bl.entities.usuario.Vendedor;
 import cr.ac.ucenfotec.baron.federico.bl.logic.Service;
 
 import java.io.BufferedReader;
@@ -45,11 +49,13 @@ public class Main {
             out.println("----- Vamos a Vender y Comprar -----");
             out.println("1. Registrar Usuarios");
             out.println("2. Listar Usuarios");
-            out.println("3. Crear una subasta");
-            out.println("4. Listar subastas");
-            out.println("5. Crear una oferta");
-            out.println("6. Listar ofertas");
-            out.println("7. Cancelar subastas");
+            out.println("3. Iniciar Sesión");
+            out.println("4. Crear una subasta");
+            out.println("5. Listar subastas");
+            out.println("6. Crear una oferta");
+            out.println("7. Listar ofertas");
+            out.println("8. Cancelar subastas");
+            out.println("9. Listar Ordenes");
             out.println("0. Salir");
             out.println("------------------------------------------");
             out.println("Digite una opción: ");
@@ -91,9 +97,16 @@ public class Main {
 
             case (3):
 
+                inicioSesion();
+
+
+                break;
+
+            case (4):
+
                 if (!service.hayUsuarios()) {
 
-                    out.println("No hay usuarios registrados para registrar una substa");
+                    out.println("No hay usuarios registrados para registrar una subasta");
 
                 } else {
 
@@ -101,21 +114,17 @@ public class Main {
                 }
                 break;
 
-            case (4):
+            case (5):
 
                 if (!service.haySubastas()) {
-
                     out.println("No hay subastas registrados");
-
                 } else {
-
                     listarSubasta();
-
                 }
 
                 break;
 
-            case (5):
+            case (6):
                 if (!service.haySubastas()) {
 
                     out.println("No hay subastas registrados para crear una oferta");
@@ -126,31 +135,27 @@ public class Main {
                 }
                 break;
 
-            case (6):
+            case (7):
 
                 if (!service.hayOfertas()) {
-
                     out.println("No hay ofertas registrados");
-
                 } else {
-
                     listarOfertas();
+                }
+                break;
+            case (8):
+
+                if (!service.haySubastas()) {
+                    out.println("No hay subastas registrados");
+                } else {
+                    cancelarSubastas();
                 }
 
                 break;
 
+            case (9):
 
-            case (7):
-
-                if (!service.haySubastas()) {
-
-                    out.println("No hay subastas registrados para crear una oferta");
-
-                } else {
-
-                    cancelarSubastas();
-                }
-
+                listarOrdenes();
                 break;
 
             case (0):
@@ -161,11 +166,29 @@ public class Main {
         }
     }
 
-    /**
-     * Metodo para registrar los usuarios de la aplicacion y clasificarlos en 1 de los 3 tipos ( vendedor, coleccionsita, moderador)
-     *
-     * @throws IOException the io exception
-     */
+    public static void registrarModerador() throws IOException {
+
+        String nombre;
+        int id;
+        String contrasena;
+        String correoElectronico;
+        LocalDate fechaNacimiento;
+
+        out.println("------- Registro Moderador -------");
+        out.println("Nombre: ");
+        nombre = in.readLine();
+        out.println("Identificación: ");
+        id = Integer.parseInt(in.readLine());
+        out.println("Correo Electronico: ");
+        correoElectronico = in.readLine();
+        out.println("Contraseña: ");
+        contrasena = in.readLine();
+        out.println("Fecha Nacimiento: (AAAA-MM-DD)");
+        fechaNacimiento = LocalDate.parse(in.readLine());
+
+        service.registrarModerador(nombre, id, contrasena, correoElectronico, fechaNacimiento);
+    }
+
     public static void registrarUsuarios() throws IOException { // Metodo para registrar Usuarios
 
         String nombre;
@@ -174,7 +197,6 @@ public class Main {
         String correoElectronico;
         LocalDate fechaNacimiento;
 
-        TipoUsuario tipo = null;
         int menuTipo;
         double puntuacion = 0;
         String direccion = "";
@@ -199,49 +221,37 @@ public class Main {
         out.println("Fecha Nacimiento: (AAAA-MM-DD)");
         fechaNacimiento = LocalDate.parse(in.readLine());
         out.println("Tipo: ");
-        out.println("1. Moderador ");
-        out.println("2. Vendedor");
-        out.println("3. Coleccionista");
+        out.println("1. Vendedor ");
+        out.println("2. Coleccionista");
 
         menuTipo = Integer.parseInt(in.readLine());
 
         switch (menuTipo) {
 
-            case (1): // Datos Extra Moderador
-
-                tipo = TipoUsuario.MODERADOR;
-                puntuacion = 0;
-                direccion = "";
-                service.registrarUsuarios(nombre, id, contrasena, correoElectronico, puntuacion, direccion, tipo, fechaNacimiento);
-
-                break;
-
-            case (2): // Datos Extra Vendedor
+            case (1): // Datos Extra vendedor
 
                 out.println("Puntuación: (1 al 5) ");
                 puntuacion = Double.parseDouble(in.readLine());
                 out.println("Dirección: ");
                 direccion = in.readLine();
-                tipo = TipoUsuario.VENDEDOR;
-                service.registrarUsuarios(nombre, id, contrasena, correoElectronico, puntuacion, direccion, tipo, fechaNacimiento);
 
+                service.registrarVendedor(nombre, id, contrasena, correoElectronico, fechaNacimiento, puntuacion, direccion);
 
                 break;
 
-
-            case (3): //Datos Extra Coleccionista
+            case (2): // Datos Extra coleccionista
 
                 out.println("Puntuación: (1 al 5) ");
                 puntuacion = Double.parseDouble(in.readLine());
                 out.println("Dirección: ");
                 direccion = in.readLine();
-                tipo = TipoUsuario.COLECCIONISTA;
+
                 out.println("----- Lista de intereses ----- ");
                 out.println("¿Quiere agregar objetos de interes a su lista? ");
                 out.println("1.Si 2.NO");
                 opcionInteres = Integer.parseInt(in.readLine());
 
-                Usuario nuevoUsuario = service.registrarUsuarios(nombre, id, contrasena, correoElectronico, puntuacion, direccion, tipo, fechaNacimiento);
+                Coleccionista nuevoColeccionista = service.registrarColeccionista(nombre, id, contrasena, correoElectronico, fechaNacimiento, puntuacion, direccion);
 
                 while (opcionInteres == 1) {
 
@@ -250,7 +260,7 @@ public class Main {
                     out.println("Ingrese un objeto de su interes: ");
                     objetoInteres = in.readLine();
 
-                    nuevoUsuario.getListaIntereses().add(objetoInteres);
+                    nuevoColeccionista.getListaIntereses().add(objetoInteres);
 
                     out.println("¿Agregar otro? 1.Si 2.No");
                     opcionInteres = Integer.parseInt(in.readLine());
@@ -272,8 +282,8 @@ public class Main {
                     out.println("1. Nuevo: ");
                     out.println("2. Usado: ");
                     out.println("3. Antiguo sin abrir: ");
-
                     menuEstadoObjeto = Integer.parseInt(in.readLine());
+
                     switch (menuEstadoObjeto) {
 
                         case (1): // Nuevo
@@ -303,10 +313,9 @@ public class Main {
                     out.println("¿Agregar otro? 1.Si 2.No");
                     opcionObjetos = Integer.parseInt(in.readLine());
 
-                    service.registrarObjetosColeccionista(nuevoUsuario, nombreObjeto, descripcion, estado, fechaCompra);
+                    service.registrarObjetosColeccionista(nuevoColeccionista, nombreObjeto, descripcion, estado, fechaCompra);
                 }
                 break;
-
         }
     }
     /**
@@ -315,11 +324,35 @@ public class Main {
     public static void listarUsuarios() { // Metodo para listar Usuarios
 
         for (Usuario u : service.listarUsuarios()) {
-
             out.println(u);
         }
+    }
+    /***
+     * Metodo para inicar sesión, solicita al usuario un correo y una contraaseña
+     * para poder compararla con la aldgun usuario registrado
+     * @throws IOException
+     */
+    public static void inicioSesion() throws IOException {
 
+        out.println("----- Inicio Sesión -----");
 
+        out.println("Correo Electronico: ");
+        String correoElectronico = in.readLine();
+
+        out.println("Contraseña: ");
+        String contrasena = in.readLine();
+
+        Usuario usuarioLogueado = service.inicarSesion(correoElectronico, contrasena);
+
+        if (usuarioLogueado == null) {
+
+            out.println("Error en los credenciales");
+            out.println("Intente nuevamente");
+            return;
+
+        } else {
+            out.println("Bienvenido");
+        }
     }
 
     /**
@@ -340,47 +373,54 @@ public class Main {
         int menuEstadoObjeto;
 
         out.println("------ Usuarios Registrados -----");
-        for (int i = 0; i < service.listarUsuarios().size(); i++) { // recorre el array par mostrar los usuarios registrados
 
+        for (int i = 0; i < service.listarUsuarios().size(); i++) { // recorre el array par mostrar los usuarios registrados
 
             out.println("Usuario #" + (i + 1));
             out.println("Nombre: " + service.listarUsuarios().get(i).getNombre());
             out.println("ID: " + service.listarUsuarios().get(i).getId());
             out.println("Edad: " + service.listarUsuarios().get(i).calcularEdad());
             out.println("Correo Electronico: " + service.listarUsuarios().get(i).getCorreoElectronico());
-            out.println("Tipo: " + service.listarUsuarios().get(i).getTipo());
+            if (service.listarUsuarios().get(i) instanceof Moderador) {
+                out.println("Tipo: Moderador");
+            } else if (service.listarUsuarios().get(i) instanceof Vendedor) {
+                out.println("Tipo: Vendedor");
+            } else if (service.listarUsuarios().get(i) instanceof Coleccionista) {
+                out.println("Tipo: Coleccionista");
 
+            }
             out.println("-------------------");
-
         }
 
         out.println("Ingrese el numero del usuario que va a crear la subasta: ");
         opcionCreador = Integer.parseInt(in.readLine());
         creador = service.listarUsuarios().get(opcionCreador - 1);
 
-        out.println("----- Colección Personal -----");
-        if (creador.getTipo() == TipoUsuario.COLECCIONISTA) {
 
-            for (int i = 0; i < creador.getListaObjetos().size(); i++) {
-                out.println("Objeto #" + (i + 1) + ": " + creador.getListaObjetos().get(i).getNombreObjeto());
+        if (creador instanceof Coleccionista) {
+            Coleccionista coleccionista = (Coleccionista) creador; // cast
+
+            out.println("----- Colección Personal -----");
+
+            for (int i = 0; i < coleccionista.getListaObjetos().size(); i++) {
+                out.println("Objeto #" + (i + 1) + ": " + coleccionista.getListaObjetos().get(i).getNombreObjeto());
             }
 
-            out.println("Seleccione el objeto a subastar: ");
+            out.println("Seleccione el numoer del objeto a subastar: ");
             int opcionObjeto = Integer.parseInt(in.readLine());
-            Objeto objetoSeleccionado = creador.getListaObjetos().get(opcionObjeto - 1);
+            Objeto objetoSeleccionado = coleccionista.getListaObjetos().get(opcionObjeto - 1);
 
             out.println("----- Configuración de la subasta ---------");
 
             out.println("Fecha y hora de vencimiento de la subasta (AAAA-MM-DDTHH:MM): ");
             fechaVencimiento = LocalDateTime.parse(in.readLine());
-            out.println("Ingrese el precio minimo de la subasta");
+            out.println("Ingrese el precio minimo de la subasta: (Dolares)");
             precioMinimo = Double.parseDouble(in.readLine());
             out.println(" ");
             out.println("Subasta creada con exito");
             out.println("---------------------------------");
             Subasta subasta = service.registroSubastas(fechaVencimiento, creador, precioMinimo);
             subasta.getListaObjetos().add(objetoSeleccionado);
-
 
         } else {
 
@@ -398,6 +438,7 @@ public class Main {
                 out.println("3. Antiguo sin abrir: ");
 
                 menuEstadoObjeto = Integer.parseInt(in.readLine());
+
                 switch (menuEstadoObjeto) {
 
                     case (1): // Nuevo
@@ -416,7 +457,6 @@ public class Main {
                         estado = EstadoObjeto.ANTIGUO_SIN_ABRIR;
 
                         break;
-
                 }
 
                 out.println("Ingresa la fecha de fabricación del objeto (AAAA-MM-DD): ");
@@ -429,7 +469,7 @@ public class Main {
 
                 out.println("Fecha y hora de vencimiento de la subasta (AAAA-MM-DDTHH:MM): ");
                 fechaVencimiento = LocalDateTime.parse(in.readLine());
-                out.println("Ingrese el precio minimo de la subasta");
+                out.println("Ingrese el precio minimo de la subasta (Dolares): ");
                 precioMinimo = Double.parseDouble(in.readLine());
                 out.println(" ");
                 out.println("Subasta creada con exito");
@@ -438,8 +478,8 @@ public class Main {
                 Subasta subasta = service.registroSubastas(fechaVencimiento, creador, precioMinimo);
                 service.registrarObjeto(subasta, nombreObjeto, descripcion, estado, fechaCompra);
 
-
             } else {
+
                 out.println("------------------------------------");
                 out.println("El usario no puede crear una subasta");
                 out.println("debe ser Coleccionista o Vendedor");
@@ -453,7 +493,7 @@ public class Main {
      */
     public static void listarSubasta() {
 
-        for (int i = 0; i < service.listarSubastas().size(); i++) { // recorre el array par mostrar las subastas
+        for (int i = 0; i < service.listarSubastas().size(); i++) { // recorre el array para mostrar las subastas
 
             out.println("----- Subastas publicadas -----");
             out.println("Subasta #" + (i + 1));
@@ -472,12 +512,8 @@ public class Main {
             out.println("Estado de la subasta: " + service.listarSubastas().get(i).getEstado());
             out.println("Tiempo restante de la subasta: " + service.listarSubastas().get(i).calcularTiempoRestante());
             out.println("-------------------");
-
         }
-
-
     }
-
     /**
      * Metodo para registrar ofertas de los usuarios, por los ojetos antes listados
      *
@@ -489,7 +525,6 @@ public class Main {
         Subasta subasta;
         int seleccionOfertante;
         Usuario usuario;
-
 
         for (int i = 0; i < service.listarSubastas().size(); i++) { // recorre el array para mostrar las subastas
 
@@ -503,16 +538,13 @@ public class Main {
                 out.println("Descripción: " + service.listarSubastas().get(i).getListaObjetos().get(j).getDescripcion());
                 out.println("Antigüedad: " + service.listarSubastas().get(i).getListaObjetos().get(j).calcularAntiguedad());
                 out.println("Estado de la subasta: " + service.listarSubastas().get(i).getEstado());
-
             }
-
-            out.println("Precio minimo en dolares: " + service.listarSubastas().get(i).getPrecioMinimo());
+            out.println("Precio minimo: (Dolares) " + service.listarSubastas().get(i).getPrecioMinimo());
             out.println("-------------------");
         }
 
         out.println("Ingrese el numero de subasta a la que quiere ofertar ");
         seleccionoSubasta = Integer.parseInt(in.readLine());
-
         subasta = service.listarSubastas().get(seleccionoSubasta - 1);
 
         if (!service.subastaActiva(subasta)) {
@@ -520,6 +552,7 @@ public class Main {
             return;
 
         } else {
+
             out.println(" ");
             out.println("----- Usuarios ------");
             for (int i = 0; i < service.listarUsuarios().size(); i++) { // recorre el array par mostrar los usuarios registrados
@@ -527,10 +560,16 @@ public class Main {
                 out.println("Usuario #" + (i + 1));
                 out.println("Nombre: " + service.listarUsuarios().get(i).getNombre());
                 out.println("ID: " + service.listarUsuarios().get(i).getId());
+                out.println("Edad: " + service.listarUsuarios().get(i).calcularEdad() + " años");
                 out.println("Correo Electronico: " + service.listarUsuarios().get(i).getCorreoElectronico());
-                out.println("Tipo: " + service.listarUsuarios().get(i).getTipo());
+                if (service.listarUsuarios().get(i) instanceof Moderador) {
+                    out.println("Tipo: Moderadore");
+                } else if (service.listarUsuarios().get(i) instanceof Vendedor) {
+                    out.println("Tipo: Vendedor");
+                } else if (service.listarUsuarios().get(i) instanceof Coleccionista) {
+                    out.println("Tipo: Coleccionista");
+                }
                 out.println("-------------------");
-
             }
 
             out.println("Ingrese el numero del usuario que va a ofertar: ");
@@ -540,8 +579,8 @@ public class Main {
             if (service.puedeParcipar(subasta, usuario) == true) {
 
                 out.println("Este usuario no puede participar de la subasta");
-
                 return;
+
             } else {
 
                 if (service.puedeOfertar(usuario) == true) {
@@ -556,10 +595,9 @@ public class Main {
                         service.registrarOfertas(subasta, usuario, precioOferta);
                         out.println("Su oferta fue procesada exitosamente: ");
 
-
                     } else {
 
-                        out.println("Su oferta debe ser mayor al valor actual minimo");
+                        out.println("Su oferta debe ser mayor al valor minimo actual");
                         return;
                     }
 
@@ -582,21 +620,18 @@ public class Main {
 
         out.println("------- LISTA OFERTAS -------");
 
-        for (int u = 0; u < service.listarOfertas().size(); u++) {
+        for (int i = 0; i < service.listarSubastas().size(); i++) {
 
-            for (int i = 0; i < service.listarSubastas().size(); i++) {
+            service.subastaVencio(service.listarSubastas().get(i));
 
-                service.subastaVencio(service.listarSubastas().get(i));
+            for (int j = 0; j < service.listarSubastas().get(i).getListaOfertas().size(); j++) {
 
-                for (int j = 0; j < service.listarSubastas().get(i).getListaOfertas().size(); j++) {
-
-                    out.println("Ofertante: " + service.listarSubastas().get(i).getListaOfertas().get(j).getColeccionista().getNombre());
-                    out.println("Objeto: " + service.listarSubastas().get(i).getListaObjetos().get(0).getNombreObjeto());
-                    out.println("Precio: " + service.listarSubastas().get(i).getListaOfertas().get(j).getprecioOferta());
-                }
+                out.println("Ofertante: " + service.listarSubastas().get(i).getListaOfertas().get(j).getColeccionista().getNombre());
+                out.println("Objeto: " + service.listarSubastas().get(i).getListaObjetos().get(0).getNombreObjeto());
+                out.println("Precio: " + service.listarSubastas().get(i).getListaOfertas().get(j).getprecioOferta());
             }
-            out.println("Estado de la subasta: " + service.listarSubastas().get(u).getEstado());
-            out.println("Tiempo restante de la subasta: " + service.listarSubastas().get(u).calcularTiempoRestante());
+            out.println("Estado de la subasta: " + service.listarSubastas().get(i).getEstado());
+            out.println("Tiempo restante de la subasta: " + service.listarSubastas().get(i).calcularTiempoRestante());
             out.println("-------------------");
         }
     }
@@ -604,7 +639,6 @@ public class Main {
     /**
      * Meotodo para que un moderador pueda cancelar alguna subasta
      */
-
     public static void cancelarSubastas() throws IOException {
 
         int usuarioModerador;
@@ -617,8 +651,15 @@ public class Main {
             out.println("Usuario #" + (i + 1));
             out.println("Nombre: " + service.listarUsuarios().get(i).getNombre());
             out.println("ID: " + service.listarUsuarios().get(i).getId());
+            out.println("Edad: " + service.listarUsuarios().get(i).calcularEdad() + " años");
             out.println("Correo Electronico: " + service.listarUsuarios().get(i).getCorreoElectronico());
-            out.println("Tipo: " + service.listarUsuarios().get(i).getTipo());
+            if (service.listarUsuarios().get(i) instanceof Moderador) {
+                out.println("Tipo: Moderadore");
+            } else if (service.listarUsuarios().get(i) instanceof Vendedor) {
+                out.println("Tipo: Vendedor");
+            } else if (service.listarUsuarios().get(i) instanceof Coleccionista) {
+                out.println("Tipo: Coleccionista");
+            }
             out.println("-------------------");
 
         }
@@ -635,7 +676,7 @@ public class Main {
                 out.println("Subasta #" + (i + 1));
                 out.println("Nombre del creador: " + service.listarSubastas().get(i).getCreador().getNombre());
 
-                for (int j = 0; j < service.listarSubastas().get(i).getListaObjetos().size(); j++) { // ciclo for que recorre la lista de los objetos
+                for (int j = 0; j < service.listarSubastas().get(i).getListaObjetos().size(); j++) { // ciclo for que recorre la lista de los objetos de la subasta
 
                     out.println("Objeto: " + service.listarSubastas().get(i).getListaObjetos().get(j).getNombreObjeto());
                     out.println("Descripción: " + service.listarSubastas().get(i).getListaObjetos().get(j).getDescripcion());
@@ -655,8 +696,18 @@ public class Main {
             out.println("Subasta cancelada exitosamente");
 
         } else {
+
             out.println("El usuario tiene que ser tipo moderador para cancelar una subasta");
 
+        }
+    }
+    /***
+     * Metodo para listar las ordenes que están guardadas
+     */
+    public static void listarOrdenes() {
+
+        for (OrdenAdjudicacion o : service.listarOrdenes()) {
+            out.println(o);
         }
     }
     /**
@@ -667,8 +718,16 @@ public class Main {
      */
     public static void main(String[] args) throws IOException {
 
+        if (!service.existeModerador()) {
+            out.println("No existe un moderador registrado");
+            out.println("Registre un moderador");
+
+            registrarModerador();
+        }
+
         mostrarMenu();
 
     }
-
 }
+
+
