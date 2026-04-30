@@ -725,6 +725,8 @@ public class Main {
             registrarModerador();
         }
 
+        out.println("Conexión: " + service.probarConexion());
+
         mostrarMenu();
 
     }
